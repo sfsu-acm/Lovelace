@@ -6,7 +6,7 @@ const client = new SapphireClient({
 	defaultPrefix: '!',
 	caseInsensitiveCommands: true,
 	logger: {
-		level: LogLevel.Debug
+		level: LogLevel.Debug,
 	},
 	shards: 'auto',
 	intents: [
@@ -19,7 +19,7 @@ const client = new SapphireClient({
 		GatewayIntentBits.MessageContent,
 	],
 	partials: [Partials.Channel],
-	loadMessageCommandListeners: true
+	loadMessageCommandListeners: true,
 });
 
 const main = async () => {

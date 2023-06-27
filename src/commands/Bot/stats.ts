@@ -20,17 +20,35 @@ export class StatsCommand extends Command {
 			.setColor(0x04ff70)
 			.setThumbnail(`${this.container.client.user?.avatarURL()}`)
 			.addFields(
-				{ name: '🍽️ Serving', value: codeBlock(`${this.container.client.guilds.cache.size} server(s)\n${this.container.client.users.cache.size} user(s)`), inline: true },
+				{
+					name: '🍽️ Serving',
+					value: codeBlock(
+						`${this.container.client.guilds.cache.size} server(s)\n${this.container.client.users.cache.size} user(s)`
+					),
+					inline: true,
+				},
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				{ name: '🕑 Uptime', value: codeBlock(`${new DurationFormatter().format(this.container.client.uptime!)}`), inline: true },
-				{ name: 'Author', value: '[Leavism](https://leavism.dev/)', inline: false },
+				{
+					name: '🕑 Uptime',
+					value: codeBlock(
+						`${new DurationFormatter().format(this.container.client.uptime!)}`
+					),
+					inline: true,
+				},
+				{
+					name: 'Author',
+					value: '[Leavism](https://leavism.dev/)',
+					inline: false,
+				}
 			)
-			.setFooter(
-				{ text: `Built using: Sapphire ${sapphireVersion} | Discord.js ${discordVersion} | Node.js ${process.version}` }
-			);
+			.setFooter({
+				text: `Built using: Sapphire ${sapphireVersion} | Discord.js ${discordVersion} | Node.js ${process.version}`,
+			});
 	}
 
-	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+	public override async chatInputRun(
+		interaction: Command.ChatInputCommandInteraction
+	) {
 		return await interaction.reply({ embeds: [this.buildStatsEmbed()] });
 	}
 }

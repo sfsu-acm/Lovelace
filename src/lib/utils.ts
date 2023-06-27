@@ -1,4 +1,9 @@
-import type { ChatInputCommandSuccessPayload, Command, ContextMenuCommandSuccessPayload, MessageCommandSuccessPayload } from '@sapphire/framework';
+import type {
+	ChatInputCommandSuccessPayload,
+	Command,
+	ContextMenuCommandSuccessPayload,
+	MessageCommandSuccessPayload,
+} from '@sapphire/framework';
 import { container } from '@sapphire/framework';
 import { send } from '@sapphire/plugin-editable-commands';
 import { cyan } from 'colorette';
@@ -29,22 +34,47 @@ export function getLoadingMessage(): string {
  * @param message The message data for which to send the loading message
  */
 export function sendLoadingMessage(message: Message): Promise<typeof message> {
-	return send(message, { embeds: [new EmbedBuilder().setDescription(pickRandom(RandomLoadingMessage)).setColor('#FF0000')] });
+	return send(message, {
+		embeds: [
+			new EmbedBuilder()
+				.setDescription(pickRandom(RandomLoadingMessage))
+				.setColor('#FF0000'),
+		],
+	});
 }
 
-export function logSuccessCommand(payload: ContextMenuCommandSuccessPayload | ChatInputCommandSuccessPayload | MessageCommandSuccessPayload): void {
+export function logSuccessCommand(
+	payload:
+		| ContextMenuCommandSuccessPayload
+		| ChatInputCommandSuccessPayload
+		| MessageCommandSuccessPayload
+): void {
 	let successLoggerData: ReturnType<typeof getSuccessLoggerData>;
 
 	if ('interaction' in payload) {
-		successLoggerData = getSuccessLoggerData(payload.interaction.guild, payload.interaction.user, payload.command);
+		successLoggerData = getSuccessLoggerData(
+			payload.interaction.guild,
+			payload.interaction.user,
+			payload.command
+		);
 	} else {
-		successLoggerData = getSuccessLoggerData(payload.message.guild, payload.message.author, payload.command);
+		successLoggerData = getSuccessLoggerData(
+			payload.message.guild,
+			payload.message.author,
+			payload.command
+		);
 	}
 
-	container.logger.debug(`${successLoggerData.shard} - ${successLoggerData.commandName} ${successLoggerData.author} ${successLoggerData.sentAt}`);
+	container.logger.debug(
+		`${successLoggerData.shard} - ${successLoggerData.commandName} ${successLoggerData.author} ${successLoggerData.sentAt}`
+	);
 }
 
-export function getSuccessLoggerData(guild: Guild | null, user: User, command: Command) {
+export function getSuccessLoggerData(
+	guild: Guild | null,
+	user: User,
+	command: Command
+) {
 	const shard = getShardInfo(guild?.shardId ?? 0);
 	const commandName = getCommandInfo(command);
 	const author = getAuthorInfo(user);
