@@ -1,6 +1,16 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable indent */
 import { ApplyOptions } from '@sapphire/decorators';
-import { Listener, Store } from '@sapphire/framework';
-import { blue, gray, green, magenta, magentaBright, white, yellow } from 'colorette';
+import { Listener, Piece, Store } from '@sapphire/framework';
+import {
+	blue,
+	gray,
+	green,
+	magenta,
+	magentaBright,
+	white,
+	yellow,
+} from 'colorette';
 
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -25,7 +35,7 @@ export class UserEvent extends Listener {
 
 		// Offset Pad
 		const pad = ' '.repeat(7);
-
+		// prettier-ignore
 		console.log(
 			String.raw`
 ${line01} ${pad}${blc('1.0.0')}
@@ -38,13 +48,17 @@ ${line03}${dev ? ` ${pad}${blc('<')}${llc('/')}${blc('>')} ${llc('DEVELOPMENT MO
 	private printStoreDebugInformation() {
 		const { client, logger } = this.container;
 		const stores = [...client.stores.values()];
-		const last = stores.pop()!;
+		const last = stores.pop();
 
 		for (const store of stores) logger.info(this.styleStore(store, false));
-		logger.info(this.styleStore(last, true));
+		if (last) logger.info(this.styleStore(last, true));
 	}
 
-	private styleStore(store: Store<any>, last: boolean) {
-		return gray(`${last ? '└─' : '├─'} Loaded ${this.style(store.size.toString().padEnd(3, ' '))} ${store.name}.`);
+	private styleStore(store: Store<Piece>, last: boolean) {
+		return gray(
+			`${last ? '└─' : '├─'} Loaded ${this.style(
+				store.size.toString().padEnd(3, ' ')
+			)} ${store.name}.`
+		);
 	}
 }
