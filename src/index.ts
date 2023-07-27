@@ -8,7 +8,7 @@ const client = new SapphireClient({
 	logger: {
 		level: LogLevel.Debug,
 	},
-	shards: 'auto',
+	shards: 'none',
 	intents: [
 		GatewayIntentBits.GuildEmojisAndStickers,
 		GatewayIntentBits.GuildMembers,
