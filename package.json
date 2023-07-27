@@ -20,7 +20,8 @@
 		"@skyra/env-utilities": "^1.2.1",
 		"@tsconfig/node16": "^1.0.3",
 		"colorette": "^2.0.20",
-		"discord.js": "^14.11.0"
+		"discord.js": "^14.11.0",
+		"node.js": "^0.0.1-security"
 	},
 	"devDependencies": {
 		"@sapphire/prettier-config": "^1.4.5",
