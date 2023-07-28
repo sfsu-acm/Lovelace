@@ -5,6 +5,7 @@ import { GuildMember } from "discord.js";
 @ApplyOptions<Command.Options>({
     name: 'emit-guild-add',
 	description: 'Emits GUILD_MEMBER_ADD to test welcome message',
+    requiredUserPermissions: ['Administrator']
 })
 export class PingCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
