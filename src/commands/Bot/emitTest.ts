@@ -1,14 +1,10 @@
 import { Command } from "@sapphire/framework";
 import { ApplyOptions } from "@sapphire/decorators";
-import { isMessageInstance } from "@sapphire/discord.js-utilities";
 import { GuildMember } from "discord.js";
-import { EventEmitter } from "events";
-
 
 @ApplyOptions<Command.Options>({
     name: 'emit-guild-add',
 	description: 'Emits GUILD_MEMBER_ADD to test welcome message',
-    aliases: ['kick'],
 })
 export class PingCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
@@ -19,13 +15,13 @@ export class PingCommand extends Command {
 	}
 
     public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-        const msg = await interaction.reply({content: "emit", ephemeral: true, fetchReply: true});
-        
-        if (isMessageInstance(msg)) {
-            //Emmits GUILD_MEMBER_ADD event to test the joinEventListener
-            const emitter = new EventEmitter();
-            await emitter.emit("GUILD_MEMBER_ADD", GuildMember);
-            return await interaction.reply(`Event Emitted`);
-        } 
+        const guild = this.container.client.guilds.cache.get('1115435349171253360')
+        if (guild) {
+            const member = guild.members.cache.get('334528824949866497') as GuildMember
+            await interaction.reply({content: 'Emitting', ephemeral: true, fetchReply: true})
+            this.container.client.emit('guildMemberAdd', member)
+        } else {
+            await interaction.reply({content: 'Could not find guild or member', ephemeral: true})
+        }
     }
 }

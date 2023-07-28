@@ -1,23 +1,20 @@
-import { Command, Listener } from "@sapphire/framework";
-import { ChatInputCommandInteraction, Client, CommandInteraction, TextChannel } from "discord.js";
+import { Listener } from "@sapphire/framework";
+import {GuildMember, TextChannel } from "discord.js";
 
 
 export class GuildMemberAddGreeting extends Listener {
     public constructor(context: Listener.Context, options: Listener.Options) {
         super(context, {
             ...options,
-            emitter: 'ws',              
-            event: 'GUILD_MEMBER_ADD',  
+            event: 'guildMemberAdd',  
             once: false
         });
     }
 
-    public override async run(client: Client) {
-        //Create message
-        if (client.user) {
-            //Generate TextChannel obj from greet channel then send welcome message tagging user
-            await (client.channels.cache.get('greet') as TextChannel).send(`Hi @${client.user.tag}. Welcome to the ACM Discord!`)
-        }
+    public override async run(member: GuildMember) {
+        //CHANGE ONCE MOVED TO ACM SERVER
+        const channel = this.container.client.channels.cache.get('1115435350060445817') as TextChannel
+        await channel.send(`Hi ${member.user}. Welcome to the ACM Discord Server`)
     }
 }
 
