@@ -9,7 +9,6 @@ import { EventEmitter } from "events";
     name: 'emit-guild-add',
 	description: 'Emits GUILD_MEMBER_ADD to test welcome message',
     aliases: ['kick'],
-    requiredUserPermissions: "Administrator"
 })
 export class PingCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
