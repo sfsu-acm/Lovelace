@@ -13,9 +13,7 @@ export class GuildMemberAddGreeting extends Listener {
 
     public override async run(member: GuildMember) {
         //Only server ID needs to be changed when moving to ACM server
-        const systemChannelID = this.container.client.guilds.cache.get('1115435349171253360')!.systemChannelId!;
-        const channel = this.container.client.channels.cache.get(systemChannelID) as TextChannel
-        await channel.send(`Hi ${member.user}. Welcome to the ACM Discord Server!`)
+        await this.container.client.guilds.cache.get('1115435349171253360')!.systemChannel!.send(`Hi ${member.user}. Welcome to the ACM Discord Server!`);
     }
 }
 
