@@ -17,7 +17,7 @@ import { srcDir } from './constants';
 
 // Set default behavior to bulk overwrite
 ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(
-	RegisterBehavior.BulkOverwrite
+	RegisterBehavior.BulkOverwrite,
 );
 
 // Read env var

@@ -1,5 +1,3 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
-/* eslint-disable indent */
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener, Piece, Store } from '@sapphire/framework';
 import {
@@ -33,15 +31,13 @@ export class UserEvent extends Listener {
 		const line02 = llc('');
 		const line03 = llc('');
 
-		// Offset Pad
 		const pad = ' '.repeat(7);
-		// prettier-ignore
 		console.log(
 			String.raw`
 ${line01} ${pad}${blc('1.0.0')}
 ${line02} ${pad}[${success}] Gateway
 ${line03}${dev ? ` ${pad}${blc('<')}${llc('/')}${blc('>')} ${llc('DEVELOPMENT MODE')}` : ''}
-		`.trim()
+		`.trim(),
 		);
 	}
 
@@ -56,9 +52,7 @@ ${line03}${dev ? ` ${pad}${blc('<')}${llc('/')}${blc('>')} ${llc('DEVELOPMENT MO
 
 	private styleStore(store: Store<Piece>, last: boolean) {
 		return gray(
-			`${last ? '└─' : '├─'} Loaded ${this.style(
-				store.size.toString().padEnd(3, ' ')
-			)} ${store.name}.`
+			`${last ? '└─' : '├─'} Loaded ${this.style(store.size.toString().padEnd(3, ' '))} ${store.name}.`,
 		);
 	}
 }

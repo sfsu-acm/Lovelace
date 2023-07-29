@@ -30,14 +30,16 @@ export class PingCommand extends Command {
 				{
 					name: '📡 API Latency',
 					value: codeBlock(
-						`${message.createdTimestamp - loading.createdTimestamp}ms`
+						`${message.createdTimestamp - loading.createdTimestamp}ms`,
 					),
 					inline: true,
-				}
+				},
 			);
 	}
 
-	public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+	public override async chatInputRun(
+		interaction: Command.ChatInputCommandInteraction,
+	) {
 		const loadingMessage = await interaction.reply({
 			content: getLoadingMessage(),
 			fetchReply: true,

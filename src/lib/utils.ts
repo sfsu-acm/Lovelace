@@ -47,7 +47,7 @@ export function logSuccessCommand(
 	payload:
 		| ContextMenuCommandSuccessPayload
 		| ChatInputCommandSuccessPayload
-		| MessageCommandSuccessPayload
+		| MessageCommandSuccessPayload,
 ): void {
 	let successLoggerData: ReturnType<typeof getSuccessLoggerData>;
 
@@ -55,25 +55,25 @@ export function logSuccessCommand(
 		successLoggerData = getSuccessLoggerData(
 			payload.interaction.guild,
 			payload.interaction.user,
-			payload.command
+			payload.command,
 		);
 	} else {
 		successLoggerData = getSuccessLoggerData(
 			payload.message.guild,
 			payload.message.author,
-			payload.command
+			payload.command,
 		);
 	}
 
 	container.logger.debug(
-		`${successLoggerData.shard} - ${successLoggerData.commandName} ${successLoggerData.author} ${successLoggerData.sentAt}`
+		`${successLoggerData.shard} - ${successLoggerData.commandName} ${successLoggerData.author} ${successLoggerData.sentAt}`,
 	);
 }
 
 export function getSuccessLoggerData(
 	guild: Guild | null,
 	user: User,
-	command: Command
+	command: Command,
 ) {
 	const shard = getShardInfo(guild?.shardId ?? 0);
 	const commandName = getCommandInfo(command);

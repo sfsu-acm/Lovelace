@@ -23,15 +23,14 @@ export class StatsCommand extends Command {
 				{
 					name: '🍽️ Serving',
 					value: codeBlock(
-						`${this.container.client.guilds.cache.size} server(s)\n${this.container.client.users.cache.size} user(s)`
+						`${this.container.client.guilds.cache.size} server(s)\n${this.container.client.users.cache.size} user(s)`,
 					),
 					inline: true,
 				},
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				{
 					name: '🕑 Uptime',
 					value: codeBlock(
-						`${new DurationFormatter().format(this.container.client.uptime!)}`
+						`${this.container.client.uptime ? new DurationFormatter().format(this.container.client.uptime) : 'N/A'}`,
 					),
 					inline: true,
 				},
@@ -39,7 +38,7 @@ export class StatsCommand extends Command {
 					name: 'Author',
 					value: '[Leavism](https://leavism.dev/)',
 					inline: false,
-				}
+				},
 			)
 			.setFooter({
 				text: `Built using: Sapphire ${sapphireVersion} | Discord.js ${discordVersion} | Node.js ${process.version}`,
@@ -47,7 +46,7 @@ export class StatsCommand extends Command {
 	}
 
 	public override async chatInputRun(
-		interaction: Command.ChatInputCommandInteraction
+		interaction: Command.ChatInputCommandInteraction,
 	) {
 		return await interaction.reply({ embeds: [this.buildStatsEmbed()] });
 	}

@@ -9,7 +9,7 @@ export class UserEvent extends Listener<
 > {
 	public async run(
 		{ context, message: content }: UserError,
-		{ interaction }: ContextMenuCommandDeniedPayload
+		{ interaction }: ContextMenuCommandDeniedPayload,
 	) {
 		// `context: { silent: true }` should make UserError silent:
 		// Use cases for this are for example permissions error when running the `eval` command.
