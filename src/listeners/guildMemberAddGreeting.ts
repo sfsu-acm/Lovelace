@@ -12,10 +12,8 @@ export class GuildMemberAddGreeting extends Listener {
 
 	public override async run(member: GuildMember) {
 		// Sending message to designated system channel using systemChannel property of Guild
-		await this.container.client.guilds.cache
-			.get('1115435349171253360')!
-			.systemChannel!.send(
-				`Hi ${member.user}. Welcome to the ACM Discord Server!`
-			);
+		await member.guild.systemChannel?.send(
+			`Hi ${member.user}. Welcome to the ACM Discord Server!`
+		);
 	}
 }
