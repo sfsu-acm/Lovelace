@@ -5,7 +5,8 @@ export class GuildMemberRemovalMessage extends Listener {
     public constructor(context: Listener.Context, options: Listener.Options) {
         super(context, {
             ...options,
-            event: 'guildMemberRemove'
+            event: 'guildMemberRemove',
+            once: false
         })
     }
 
