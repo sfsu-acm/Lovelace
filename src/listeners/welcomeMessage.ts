@@ -11,7 +11,6 @@ export class GuildMemberAddGreeting extends Listener {
 	}
 
 	public override async run(member: GuildMember) {
-		// Sending message to designated system channel using systemChannel property of Guild
 		await member.guild.systemChannel?.send(
 			`Hi ${member.user}. Welcome to the ACM Discord Server!`
 		);
