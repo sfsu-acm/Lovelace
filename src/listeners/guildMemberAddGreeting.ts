@@ -1,5 +1,5 @@
 import { Listener } from '@sapphire/framework';
-import { GuildMember, TextChannel } from 'discord.js';
+import { GuildMember } from 'discord.js';
 
 export class GuildMemberAddGreeting extends Listener {
 	public constructor(context: Listener.Context, options: Listener.Options) {
