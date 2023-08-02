@@ -12,9 +12,9 @@ export class GuildMemberRemovalMessage extends Listener {
 
 	public async run(member: GuildMember) {
 		await (
-			this.container.client.channels.cache.get(
-				'1115435350572150807'
+			member.guild.channels.cache.find(
+				(channel) => channel.name === 'logger'
 			) as TextChannel
-		).send(`${member.user} has left the server.`);
+		).send(`${member.user} has left the server`);
 	}
 }
