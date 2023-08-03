@@ -1,8 +1,9 @@
 import './lib/setup';
-import { LogLevel, SapphireClient } from '@sapphire/framework';
+import { LogLevel } from '@sapphire/framework';
 import { GatewayIntentBits, Partials } from 'discord.js';
+import { LovelaceClient } from './lib/lovelace-client';
 
-const client = new SapphireClient({
+const client = new LovelaceClient({
 	defaultPrefix: '!',
 	caseInsensitiveCommands: true,
 	logger: {
@@ -27,7 +28,8 @@ const main = async () => {
 		client.logger.info('Logging in');
 		await client.login();
 		client.logger.info('logged in');
-	} catch (error) {
+	}
+	catch (error) {
 		client.logger.fatal(error);
 		client.destroy();
 		process.exit(1);
