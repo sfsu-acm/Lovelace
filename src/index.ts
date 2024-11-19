@@ -1,8 +1,9 @@
 import './lib/setup';
-import { LogLevel, SapphireClient } from '@sapphire/framework';
-import { GatewayIntentBits, Partials } from 'discord.js';
+import { LogLevel } from '@sapphire/framework';
+import { ClientOptions, GatewayIntentBits, Partials } from 'discord.js';
+import { LovelaceClient } from "./lib/LovelaceClient";
 
-const client = new SapphireClient({
+const options: ClientOptions = {
 	defaultPrefix: '!',
 	caseInsensitiveCommands: true,
 	logger: {
@@ -20,7 +21,9 @@ const client = new SapphireClient({
 	],
 	partials: [Partials.Channel],
 	loadMessageCommandListeners: true,
-});
+}
+
+const client = new LovelaceClient(options);
 
 const main = async () => {
 	try {
