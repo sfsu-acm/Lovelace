@@ -1,7 +1,7 @@
 import './lib/setup';
 import { LogLevel } from '@sapphire/framework';
 import { ClientOptions, GatewayIntentBits, Partials } from 'discord.js';
-import { LovelaceClient } from "./lib/LovelaceClient";
+import { LovelaceClient } from './lib/LovelaceClient';
 
 const options: ClientOptions = {
 	defaultPrefix: '!',
@@ -21,7 +21,7 @@ const options: ClientOptions = {
 	],
 	partials: [Partials.Channel],
 	loadMessageCommandListeners: true,
-}
+};
 
 const client = new LovelaceClient(options);
 
