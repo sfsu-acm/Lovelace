@@ -2,7 +2,7 @@ import { SapphireClient } from '@sapphire/framework';
 import { ClientOptions } from 'discord.js';
 
 /**
- * Represents a custom LovelaceClient class, extending SapphireClient.
+ * The base client for Lovelace that extends SapphireClient.
  */
 export class LovelaceClient extends SapphireClient {
 	
@@ -15,18 +15,18 @@ export class LovelaceClient extends SapphireClient {
 	}
 
 	/**
-	 * Logs the user into Discord with the provided token.
-	 * Overrides the login function from SapphireClient
-	 * @param token - the bot token found in the `.env` file.
-	 * @returns {Promise<string>} - an asynchronous function which returns the bot token string when login successfully finishes.
+	 * Logs client in and establishes new websocket connection with Discord.
+	 * Overrides the login function from SapphireClient.
+	 * @param {string} [token] - the bot token.
+	 * @returns {Promise<string>} - the token used to log in with.
 	 */
 	public override login(token?: string): Promise<string> {
 		return super.login(token);
 	}
 
 	/**
-	 * Logs out and terminates the connection to Discord and destroys the client. :(
-	 * @returns {Promise<void>} - an asynchronous function which resolves when the client has been destroyed.
+	 * Logs out and terminates the connection to Discord and destroys the client.
+	 * Overides SapphireClient's destroy function.
 	 */
 	public override destroy(): Promise<void> {
 		return super.destroy();
