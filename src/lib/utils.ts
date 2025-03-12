@@ -4,11 +4,46 @@ import type {
 	ContextMenuCommandSuccessPayload,
 	MessageCommandSuccessPayload,
 } from '@sapphire/framework';
+import type {
+	Collection,
+	NonThreadGuildBasedChannel,
+	Channel
+} from 'discord.js';
 import { container } from '@sapphire/framework';
 import { send } from '@sapphire/plugin-editable-commands';
 import { cyan } from 'colorette';
 import { EmbedBuilder, Guild, Message, User, type APIUser } from 'discord.js';
 import { RandomLoadingMessage } from './constants';
+
+/**
+ * Finds a text channel based on a channel ID
+ * 
+ * @param channelId Text channel ID
+ */
+export async function findTextChannel(channelId: string): Promise<Channel | null>;
+
+/**
+ * Finds text channels in a guild with a given name
+ *
+ * @param {Guild} guild The guild object to search through
+ * @param channelName The name of the channel to look for
+ */
+export async function findTextChannel(guild: Guild, channelName: string): Promise<Collection<string, NonThreadGuildBasedChannel | null>>;
+
+export async function findTextChannel(
+  guildOrId: Guild | string, 
+  channelName?: string
+): Promise<Channel | null | Collection<string, NonThreadGuildBasedChannel | null>> {
+  if (typeof guildOrId === 'string') {
+    // First overload: Find by channel ID
+    return container.client.channels.fetch(guildOrId);
+  } else {
+    // Second overload: Find by name in guild
+    const channelManager = guildOrId.channels;
+    const channels = await channelManager.fetch();
+    return channels.filter(channel => channel?.name === channelName);
+  }
+}
 
 /**
  * Picks a random item from an array
