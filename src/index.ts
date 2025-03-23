@@ -11,6 +11,7 @@ const options: ClientOptions = {
 	},
 	shards: 'auto',
 	intents: [
+		// TODO: GuildEmojisAndStickers is deprecated
 		GatewayIntentBits.GuildEmojisAndStickers,
 		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.GuildMessageReactions,
@@ -18,6 +19,7 @@ const options: ClientOptions = {
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildVoiceStates,
 		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildScheduledEvents,
 	],
 	partials: [Partials.Channel],
 	loadMessageCommandListeners: true,
