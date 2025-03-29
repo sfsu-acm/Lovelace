@@ -1,8 +1,8 @@
 import { Listener, container } from '@sapphire/framework';
 import { GuildScheduledEvent } from 'discord.js';
-import { yellow } from 'colorette';
+import { yellow, cyan } from 'colorette';
 
-export class DeleteEventRoleOnComplete extends Listener {
+export class OnEventComplete extends Listener {
 	public constructor(
 		context: Listener.LoaderContext,
 		options: Listener.Options,
@@ -10,7 +10,6 @@ export class DeleteEventRoleOnComplete extends Listener {
 		super(context, {
 			...options,
 			event: 'guildScheduledEventUpdate',
-			once: false,
 		});
 	}
 
@@ -25,7 +24,8 @@ export class DeleteEventRoleOnComplete extends Listener {
 		try {
 			if (!newScheduledEvent.guild) {
 				return client.logger.error(
-					`Failed to find guild from ${newScheduledEvent}`,
+					`Failed to find guild from scheduled event ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}].`,
+					'\nCannot proceed with deleting event role nor database entry.',
 				);
 			}
 			const dbEvent = await database.findScheduledEvent(newScheduledEvent.id);
@@ -33,7 +33,7 @@ export class DeleteEventRoleOnComplete extends Listener {
 
 			if (!role) {
 				client.logger.error(
-					`Failed to find role associated with scheduled event ${yellow(newScheduledEvent.name)} \(${yellow(newScheduledEvent.id)}\). Attempting to delete corresponding database entry.`,
+					`Failed to find role associated with scheduled event ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}\]. Attempting to delete corresponding database entry.`,
 				);
 			} else {
 				client.logger.info(
@@ -55,7 +55,7 @@ export class DeleteEventRoleOnComplete extends Listener {
 				);
 			} else {
 				client.logger.warn(
-					`Failed to find a database entry for ${yellow(newScheduledEvent.name)} \(${yellow(newScheduledEvent.id)}\)`,
+					`Failed to find a database entry for ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}\]`,
 				);
 			}
 		} catch (error) {

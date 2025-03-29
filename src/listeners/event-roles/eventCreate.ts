@@ -1,9 +1,9 @@
 import { Listener, container } from '@sapphire/framework';
 import { GuildScheduledEvent } from 'discord.js';
-import { yellow } from 'colorette';
+import { cyan, yellow } from 'colorette';
 
 // TODO: Check behavior of recurring scheduled events
-export class CreateEventRole extends Listener {
+export class OnEventCreate extends Listener {
 	public constructor(
 		context: Listener.LoaderContext,
 		options: Listener.Options,
@@ -11,7 +11,6 @@ export class CreateEventRole extends Listener {
 		super(context, {
 			...options,
 			event: 'guildScheduledEventCreate',
-			once: false,
 		});
 	}
 
@@ -20,16 +19,18 @@ export class CreateEventRole extends Listener {
 
 		try {
 			if (!scheduledEvent.guild) {
-				return client.logger.error([
-					`Failed to find guild from ${scheduledEvent}`,
-					'Cannot proceed with creating scheduled event role.',
-				]);
+				return client.logger.error(
+					`Failed to find guild from scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}].`,
+					'\nCannot proceed with creating scheduled event role.',
+				);
 			}
 			// TODO: Add unique identifier to role name
 			const role = await scheduledEvent.guild.roles.create({
 				name: `${scheduledEvent.name}`,
 				mentionable: true,
 				reason: `Role for the scheduled event ${scheduledEvent.name}.`,
+				// No permissions for these custom roles
+				permissions: [],
 			});
 
 			client.logger.info(
