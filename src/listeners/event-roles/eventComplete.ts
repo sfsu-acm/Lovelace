@@ -3,63 +3,70 @@ import { GuildScheduledEvent } from 'discord.js';
 import { yellow, cyan } from 'colorette';
 
 export class OnEventComplete extends Listener {
-	public constructor(
-		context: Listener.LoaderContext,
-		options: Listener.Options,
-	) {
-		super(context, {
-			...options,
-			event: 'guildScheduledEventUpdate',
-		});
-	}
+  public constructor(
+    context: Listener.LoaderContext,
+    options: Listener.Options,
+  ) {
+    super(context, {
+      ...options,
+      event: 'guildScheduledEventUpdate',
+    });
+  }
 
-	public override async run(
-		_oldScheduleEvent: GuildScheduledEvent,
-		newScheduledEvent: GuildScheduledEvent,
-	) {
-		if (!newScheduledEvent.isCompleted()) return;
+  public override async run(
+    _oldScheduleEvent: GuildScheduledEvent,
+    newScheduledEvent: GuildScheduledEvent,
+  ) {
+    if (!newScheduledEvent.isCompleted()) return;
 
-		const { client, database } = container;
+    const { client, database, enrollmentQueue } = container;
 
-		try {
-			if (!newScheduledEvent.guild) {
-				return client.logger.error(
-					`Failed to find guild from scheduled event ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}].`,
-					'\nCannot proceed with deleting event role nor database entry.',
-				);
-			}
-			const dbEvent = await database.findScheduledEvent(newScheduledEvent.id);
-			const role = await newScheduledEvent.guild.roles.fetch(dbEvent.roleId);
+    try {
+      if (!newScheduledEvent.guild) {
+        return client.logger.error(
+          `Failed to find guild from scheduled event ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}].`,
+          '\nCannot proceed with deleting event role nor database entry.',
+        );
+      }
 
-			if (!role) {
-				client.logger.error(
-					`Failed to find role associated with scheduled event ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}\]. Attempting to delete corresponding database entry.`,
-				);
-			} else {
-				client.logger.info(
-					`Deleted role ${yellow(role.name)} associated with ${yellow(newScheduledEvent.name)}`,
-				);
-				await role.delete(
-					`Deleted role associated with scheduled event ${newScheduledEvent.name} that has ended.`,
-				);
-			}
+      enrollmentQueue.clearEventQueue(newScheduledEvent);
+      const dbEvent = await database.findScheduledEvent(newScheduledEvent.id);
+      if (!dbEvent) {
+        client.logger.error(
+          `Failed to find a database entry for ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}\]`,
+        )
+      }
+      const role = await newScheduledEvent.guild.roles.fetch(dbEvent.roleId);
 
-			const deleteResult = await database.deleteScheduledEvent(
-				newScheduledEvent.id,
-			);
-			// Schema eventId row contains unique values only, so deleting should affect
-			// only 1 or 0 rows
-			if (deleteResult.affectedRows > 0) {
-				client.logger.info(
-					`Deleted database entry for ${yellow(newScheduledEvent.name)}`,
-				);
-			} else {
-				client.logger.warn(
-					`Failed to find a database entry for ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}\]`,
-				);
-			}
-		} catch (error) {
-			return client.logger.error(error);
-		}
-	}
+      if (!role) {
+        client.logger.error(
+          `Failed to find role associated with scheduled event ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}\]. Attempting to delete corresponding database entry.`,
+        );
+      } else {
+        client.logger.info(
+          `Deleted role ${yellow(role.name)} associated with ${yellow(newScheduledEvent.name)}`,
+        );
+        await role.delete(
+          `Deleted role associated with scheduled event ${newScheduledEvent.name} that has ended.`,
+        );
+      }
+
+      const deleteResult = await database.deleteScheduledEvent(
+        newScheduledEvent.id,
+      );
+      // Schema eventId row contains unique values only, so deleting should affect
+      // only 1 or 0 rows
+      if (deleteResult.affectedRows > 0) {
+        client.logger.info(
+          `Deleted database entry for ${yellow(newScheduledEvent.name)}`,
+        );
+      } else {
+        client.logger.warn(
+          `Failed to delete database entry for ${yellow(newScheduledEvent.name)}[${cyan(newScheduledEvent.id)}\]`,
+        );
+      }
+    } catch (error) {
+      return client.logger.error(error);
+    }
+  }
 }
