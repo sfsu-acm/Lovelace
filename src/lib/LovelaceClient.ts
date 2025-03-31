@@ -1,26 +1,30 @@
-import { SapphireClient } from '@sapphire/framework';
+import { SapphireClient, container } from '@sapphire/framework';
 import { ClientOptions } from 'discord.js';
+import { LovelaceDB } from './LovelaceDB';
+import { EnrollmentQueue } from './eventQueue';
 
 /**
- * The base client for Lovelace that extends SapphireClient.
+ * The base client for Lovelace that extends SapphireClient. The database connection is initialize and destroyed
+ * with the client.
  */
 export class LovelaceClient extends SapphireClient {
-	
 	/**
 	 * Constructor to initialize a new instance of LovelaceClient
-	 * @param {ClientOptions} options - the defined options for the discord client. Parameter required by SapphireClient
+	 * @param {ClientOptions} options - the defined options for the Discord client, required by SapphireClient.
 	 */
 	constructor(options: ClientOptions) {
 		super(options);
 	}
 
 	/**
-	 * Logs client in and establishes new websocket connection with Discord.
+	 * Establishes new websocket connection with Discord and creates a new database connection.
 	 * Overrides the login function from SapphireClient.
 	 * @param {string} [token] - the bot token.
 	 * @returns {Promise<string>} - the token used to log in with.
 	 */
-	public override login(token?: string): Promise<string> {
+	public override async login(token?: string): Promise<string> {
+		container.database = await LovelaceDB.getInstance();
+		container.enrollmentQueue = new EnrollmentQueue();
 		return super.login(token);
 	}
 
@@ -28,7 +32,15 @@ export class LovelaceClient extends SapphireClient {
 	 * Logs out and terminates the connection to Discord and destroys the client.
 	 * Overides SapphireClient's destroy function.
 	 */
-	public override destroy(): Promise<void> {
+	public override async destroy(): Promise<void> {
+		await LovelaceDB.destroy();
 		return super.destroy();
+	}
+}
+
+declare module '@sapphire/pieces' {
+	interface Container {
+		database: LovelaceDB;
+		enrollmentQueue: EnrollmentQueue;
 	}
 }

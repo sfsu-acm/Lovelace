@@ -11,15 +11,20 @@ const options: ClientOptions = {
 	},
 	shards: 'auto',
 	intents: [
-		GatewayIntentBits.GuildEmojisAndStickers,
 		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildVoiceStates,
 		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildScheduledEvents,
 	],
-	partials: [Partials.Channel],
+	partials: [
+		Partials.Channel,
+		Partials.GuildMember,
+		Partials.User,
+		Partials.GuildScheduledEvent,
+	],
 	loadMessageCommandListeners: true,
 };
 
