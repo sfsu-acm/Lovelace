@@ -1,8 +1,26 @@
+/**
+ * @file OnEventDelete.ts
+ * @description Listener for handling Discord scheduled event deletion.
+ * Performs cleanup for deleted events including role removal and database cleanup.
+ */
+
 import { Listener, container } from '@sapphire/framework';
 import { GuildScheduledEvent } from 'discord.js';
 import { yellow, cyan } from 'colorette';
 
+/**
+ * Listener that handles the deletion of Discord scheduled events.
+ * Performs cleanup tasks including:
+ * - Clearing the enrollment queue for the event
+ * - Deleting the associated role
+ * - Removing the database entry
+ */
 export class OnEventDelete extends Listener {
+  /**
+   * Creates a new OnEventDelete listener
+   * @param context - The loader context
+   * @param options - The listener options
+   */
   public constructor(
     context: Listener.LoaderContext,
     options: Listener.Options,
@@ -13,9 +31,13 @@ export class OnEventDelete extends Listener {
     });
   }
 
+  /**
+   * Handles the scheduled event deletion
+   * Cleans up resources associated with the deleted event
+   * @param scheduledEvent - The deleted scheduled event
+   */
   public override async run(scheduledEvent: GuildScheduledEvent) {
     const { client, database, enrollmentQueue } = container;
-
     try {
       if (!scheduledEvent.guild) {
         return client.logger.error(
@@ -23,14 +45,13 @@ export class OnEventDelete extends Listener {
           '\nCannot proceed with deleting event role',
         );
       }
-
       enrollmentQueue.clearEventQueue(scheduledEvent);
       const dbEvent = await database.findScheduledEvent(scheduledEvent.id);
       if (!dbEvent) {
         return client.logger.error(
-          `Failed to find a database entry for ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}\]`,
-          '\nCannot proceed with deleting the associated role and database entry.'
-        )
+          `Failed to find a database entry for ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}]`,
+          '\nCannot proceed with deleting the associated role and database entry.',
+        );
       }
       const role = await scheduledEvent.guild.roles.fetch(dbEvent.roleId);
       // A role may not exist prior to the bot deleting the event (role was manually deleted)
@@ -41,19 +62,22 @@ export class OnEventDelete extends Listener {
           `Failed to find role associated with scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}]. Attempting to delete corresponding database entry.`,
         );
       } else {
-        await role.delete(
-          `Deleted role associated with scheduled event ${scheduledEvent.name} that has ended.`,
-        ).then((role) => (
-          client.logger.info(
-            `Deleted role ${yellow(role.name)} associated with scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}].`,
+        await role
+          .delete(
+            `Deleted role associated with scheduled event ${scheduledEvent.name} that has ended.`,
           )
-        )).catch((error) => (
-          client.logger.error(
-            `Failed to delete role ${yellow(role.name)} associated with scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}].`,
+          .then((role) =>
+            client.logger.info(
+              `Deleted role ${yellow(role.name)} associated with scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}].`,
+            ),
           )
-        ))
+          .catch((error) =>
+            client.logger.error(
+              `Failed to delete role ${yellow(role.name)} associated with scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}].`,
+              error,
+            ),
+          );
       }
-
       const deleteResult = await database.deleteScheduledEvent(
         scheduledEvent.id,
       );

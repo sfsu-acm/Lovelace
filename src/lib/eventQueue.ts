@@ -1,7 +1,16 @@
+/**
+ * @file EnrollmentQueue.ts
+ * @description Queue system for processing Discord scheduled event role assignments.
+ * Prevents race conditions with the database by handling role assignments asynchronously.
+ */
+
 import { container } from '@sapphire/framework';
 import { cyan, yellow } from 'colorette';
 import { GuildScheduledEvent, User } from 'discord.js';
 
+/**
+ * Properties for items in the event queue
+ */
 type eventQueuesProp = {
   scheduledEvent: GuildScheduledEvent;
   user: User;
@@ -15,16 +24,33 @@ type eventQueuesProp = {
  * to prevent race conditions with the database.
  */
 export class EnrollmentQueue {
+  /**
+   * Map of event queues, keyed by event ID
+   */
   private eventQueues: Map<string, eventQueuesProp[]> = new Map();
-  private processing: boolean = false;
-  private readonly processInterval: number = 1000; // TODO: Change to 10 seconds for prodution
 
+  /**
+   * Flag indicating whether queue processing is currently active
+   */
+  private processing: boolean = false;
+
+  /**
+   * Interval in milliseconds between queue processing attempts
+   */
+  private readonly processInterval: number = 10000;
+
+  /**
+   * Creates a new EnrollmentQueue and starts the processing interval
+   * @constructor
+   */
   constructor() {
     setInterval(() => this.processQueues(), this.processInterval);
   }
 
   /**
-   * queueEnrollment
+   * Adds a user enrollment to the processing queue
+   * @param scheduledEvent - The Discord scheduled event
+   * @param user - The user to be assigned a role
    */
   public queueEnrollment(scheduledEvent: GuildScheduledEvent, user: User) {
     const eventId = scheduledEvent.id;
@@ -44,7 +70,7 @@ export class EnrollmentQueue {
   }
 
   /**
-   * markEventReady - Manually triggers the enrollment queue process if one isn't
+   * Manually triggers the enrollment queue process if one isn't
    * already running.
    */
   public markEventReady() {
@@ -52,14 +78,14 @@ export class EnrollmentQueue {
   }
 
   /**
-   * removeEnrollment
+   * Removes a specific user enrollment from the queue
+   * @param scheduledEvent - The Discord scheduled event
+   * @param user - The user to be removed from the queue
    */
   public removeEnrollment(scheduledEvent: GuildScheduledEvent, user: User) {
     if (!this.eventQueues.has(scheduledEvent.id)) return;
-
     const queue = this.eventQueues.get(scheduledEvent.id);
     if (!queue) return;
-
     const index = queue.findIndex((item) => item.user.id === user.id);
     if (index !== -1) {
       queue.slice(index, 1);
@@ -73,38 +99,40 @@ export class EnrollmentQueue {
   }
 
   /**
-   * clearEventQueue - Clear all pending enrollments for an event
+   * Clears all pending enrollments for a specific event
+   * @param scheduledEvent - The Discord scheduled event to clear enrollments for
    */
   public clearEventQueue(scheduledEvent: GuildScheduledEvent) {
     if (this.eventQueues.has(scheduledEvent.id)) {
       const count = this.eventQueues.get(scheduledEvent.id)?.length || 0;
       this.eventQueues.delete(scheduledEvent.id);
-
       container.logger.info(
-        `Cleared ${count} pending enrollments for scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}`,
+        `Cleared ${count} pending enrollments for scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}]`,
       );
     } else {
       // processQueues() deletes empty queues
       container.logger.info(
-        `There wasn't an enrollment queue for scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}`,
+        `There wasn't an enrollment queue for scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}]`,
       );
     }
   }
 
+  /**
+   * Processes all queued enrollments
+   * @private
+   * @async
+   */
   private async processQueues() {
     if (this.processing) return;
     this.processing = true;
-
     try {
       const { database, client } = container;
-
       for (const [eventId, queue] of this.eventQueues.entries()) {
         // delete empty queues
         if (queue.length === 0) {
           this.eventQueues.delete(eventId);
           continue;
         }
-
         const dbEvent = await database.findScheduledEvent(eventId);
         // DB entry for event not ready, log attempt and try again
         if (!dbEvent) {
@@ -115,7 +143,7 @@ export class EnrollmentQueue {
             // TODO: Not the perfect solution, but removing from queue after hitting
             // max attempts will prevent an infinitely growing queue. However, we
             // need to record somewhere, other than the logs, who didn't get processed
-            // for a role. At this current point, removing them from the enrollmentQueue
+            // for a role. At this current point, removing them from the enrollment queue
             // means they just never get the role.
             if (item.attempts >= item.maxAttempts) {
               client.logger.error(
@@ -128,12 +156,10 @@ export class EnrollmentQueue {
           }
           continue;
         }
-
         // Errors in finding the guild, role, or member does not increment
         // the attempts count.
         for (const item of queue) {
           const { scheduledEvent, user } = item;
-
           try {
             if (!scheduledEvent.guild) {
               client.logger.error(
@@ -151,8 +177,7 @@ export class EnrollmentQueue {
               );
               continue; // skip item since it failed to find role
             }
-            // A user may not be a guild member if they enrolled into the scheduled event from an
-            // external link to the event. TODO: This behavior needs to be tested.
+
             const member = await scheduledEvent.guild.members.fetch(user.id);
             if (!member) {
               client.logger.error(

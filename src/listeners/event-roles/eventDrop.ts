@@ -1,8 +1,25 @@
+/**
+ * @file OnEventDrop.ts
+ * @description Listener for handling users leaving Discord scheduled events.
+ * Removes event-specific roles from users who leave an event.
+ */
+
 import { Listener, container } from '@sapphire/framework';
 import { GuildScheduledEvent, User } from 'discord.js';
 import { yellow, cyan } from 'colorette';
 
+/**
+ * Listener that handles users leaving Discord scheduled events.
+ * Performs cleanup tasks including:
+ * - Removing the user from the enrollment queue
+ * - Removing the event-specific role from the user
+ */
 export class OnEventDrop extends Listener {
+  /**
+   * Creates a new OnEventDrop listener
+   * @param context - The loader context
+   * @param options - The listener options
+   */
   public constructor(
     context: Listener.LoaderContext,
     options: Listener.Options,
@@ -13,9 +30,14 @@ export class OnEventDrop extends Listener {
     });
   }
 
+  /**
+   * Handles a user leaving a scheduled event
+   * Removes the event role from the user and cleans up pending enrollments
+   * @param scheduledEvent - The scheduled event the user left
+   * @param user - The user who left the event
+   */
   public override async run(scheduledEvent: GuildScheduledEvent, user: User) {
     const { client, database, enrollmentQueue } = container;
-
     try {
       if (!scheduledEvent.guild) {
         return client.logger.error(
@@ -34,7 +56,6 @@ export class OnEventDrop extends Listener {
       enrollmentQueue.removeEnrollment(scheduledEvent, user);
       const dbEvent = await database.findScheduledEvent(scheduledEvent.id);
       const role = await scheduledEvent.guild.roles.fetch(dbEvent.roleId);
-
       if (!role) {
         return client.logger.error(
           `Failed to find role associated with scheduled event ${yellow(scheduledEvent.name)}[${cyan(scheduledEvent.id)}].`,
@@ -43,12 +64,9 @@ export class OnEventDrop extends Listener {
       }
 
       const member = await scheduledEvent.guild.members.fetch(user.id);
-      // A user may not be a guild member if they dropped the scheduled event from an
-      // external link to the event. TODO: This behavior needs to be tested.
       if (!member) {
         return client.logger.error(
-          // user.toString() prints <@123456789012345678>
-          `Failed to find member in guild (${yellow(scheduledEvent.guild.id)}) from user ${yellow(user.toString())}`,
+          `Failed to find user ${yellow(user.username)}[${cyan(user.id)}] as a member in guild ${yellow(scheduledEvent.guild.name)}[${cyan(scheduledEvent.guild.id)}].`,
           '\nCannot proceed with removing event role from member.',
         );
       }
@@ -56,7 +74,7 @@ export class OnEventDrop extends Listener {
       // No use in checking first if no error is thrown, because that'd just be an additional call to Discord.
       await member.roles.remove(role);
       client.logger.info(
-        `Removed role ${yellow(role.name)} from guild member ${member.displayName}[${cyan(member.id)}]`,
+        `Removed role ${yellow(role.name)} from guild member ${yellow(member.displayName)}[${cyan(member.id)}]`,
       );
     } catch (error) {
       client.logger.error(error);
