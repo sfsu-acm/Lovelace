@@ -5,7 +5,7 @@
  */
 
 import { Listener, container } from '@sapphire/framework';
-import { GuildScheduledEvent } from 'discord.js';
+import { Events, GuildScheduledEvent } from 'discord.js';
 import { cyan, yellow } from 'colorette';
 import { Timestamp } from '@sapphire/timestamp';
 import { reasonableTruncate } from '../../lib/utils';
@@ -13,9 +13,9 @@ import { reasonableTruncate } from '../../lib/utils';
 /**
  * Listener that handles the creation of Discord scheduled events.
  * Performs setup tasks including:
- * - Creating an associated role for the event
- * - Creating a database entry to track the event
- * - Enrolling the event creator
+ * - Creating an custom role associated with the event
+ * - Creating a database entry to track the event and custom role
+ * - Queue event author to get the custom role
  */
 export class OnEventCreate extends Listener {
   /**
@@ -29,7 +29,7 @@ export class OnEventCreate extends Listener {
   ) {
     super(context, {
       ...options,
-      event: 'guildScheduledEventCreate',
+      event: Events.GuildScheduledEventCreate,
     });
   }
 
@@ -47,6 +47,7 @@ export class OnEventCreate extends Listener {
           '\nCannot proceed with creating scheduled event role.',
         );
       }
+
       // Add timestamp to role name as a unique identifier
       const start = scheduledEvent.scheduledStartAt || new Date(0);
       const timestamp = new Timestamp('MMM-DD HH:mm');
@@ -63,6 +64,7 @@ export class OnEventCreate extends Listener {
         scheduledEvent.id,
         role.id,
       );
+
       // Once db entry for event is created, mark it in enrollment queue as ready for processing
       // then queue the event creator up for enrollment.
       if (result.affectedRows > 0) {
@@ -72,7 +74,7 @@ export class OnEventCreate extends Listener {
           'Marked scheduled event ready for enrollment queue.',
         );
         if (scheduledEvent.creator) {
-          enrollmentQueue.queueEnrollment(
+          enrollmentQueue.queueAssignment(
             scheduledEvent,
             scheduledEvent.creator,
           );
