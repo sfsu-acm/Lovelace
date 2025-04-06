@@ -71,14 +71,6 @@ export class CustomRoleQueue {
 	}
 
 	/**
-	 * Manually triggers the role assignment queue process if one isn't
-	 * already running.
-	 */
-	public markEventReady() {
-		this.processQueues();
-	}
-
-	/**
 	 * Removes a user from the role assignment queue
 	 * @param scheduledEvent - The Discord scheduled event
 	 * @param user - The user to be removed from the queue
@@ -127,7 +119,7 @@ export class CustomRoleQueue {
 	 * @private
 	 * @async
 	 */
-	private async processQueues() {
+	public async processQueues() {
 		if (this.processing) return;
 		this.processing = true;
 		try {
